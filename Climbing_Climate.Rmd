@@ -1,0 +1,126 @@
+---
+title: "Climbing + Climate Change"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    theme: lumen
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+
+# Installs any required packages that aren't already installed
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, httr, jsonlite,  
+               highcharter, formattable, plotly, 
+               htmlwidgets, ggridges, viridis, hrbrthemes,
+               shiny, shinythemes, flexdashboard)
+
+
+# Read in data and create factor levels for the months column
+load("all_locations.rda")
+
+# List of all possible locations
+locations_list <- locations$Place
+
+```
+
+# Sidebar {.sidebar}
+
+```{r inputs}
+
+selectInput('location',
+            label = 'Location:',
+            choices = locations_list,
+            selected = "The Buttermilks")
+
+selectInput('scenario',
+            label = 'Scenario:',
+            choices = c("Low Emissions",
+                        "High Emissions"),
+            selected = "High Emissions")
+
+sliderInput("years", "Range:",
+            min = 2005, max = 2100,
+            value = c(2035, 2065),
+            dragRange = TRUE,
+            step = 5,
+            sep = "")
+
+sliderInput("temps", "Range:",
+            min = 0, max = 100,
+            value = c(35, 55),
+            dragRange = TRUE,
+            post = " F",
+            sep = "")
+
+```
+
+```{r reactive df}
+
+# Using lapply to run through all 8 slugs and generate an ensemble mean for all priority models
+# Takes about 10-15 seconds per location
+
+rctv_df <- reactive({
+  
+  reactive_df <- all_locations %>%
+    filter(Place == input$location,
+           Year %in% (input$years[1]:input$years[2]))
+  
+})
+
+```
+
+
+
+# Ridge Plots
+
+```{r ridge plots}
+
+# Still need to make the year an average of the range
+# Using 2050 for now to test it out
+
+output$ridge_plot <- renderPlot({
+  
+  ridge_graph(data = rctv_df(),
+              scenario = input$scenario,
+              maxT = input$temps[2],
+              minT = input$temps[1])
+  
+})
+
+plotOutput('ridge_plot')
+
+```
+
+
+# Test 
+
+## Table 
+
+```{r}
+
+renderTable({
+  head(rctv_df())
+})
+
+```
+
+## Text
+
+```{r test}
+
+output$values <- renderText({
+
+  paste("The starting year is", input$years[1],
+        "and the ending year is", input$years[2],
+        "and the total range is", input$years[2]-input$years[1], ".",
+        "The selected emissions scenario is", input$scenario, ".",
+        "The ideal maximum daily temperature range is", input$temps[1], "to", input$temps[2], ".")
+
+})
+
+textOutput('values')
+
+```
