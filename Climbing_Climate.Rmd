@@ -12,7 +12,7 @@ runtime: shiny
 
 # Installs any required packages that aren't already installed
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, httr, jsonlite,  
+pacman::p_load(tidyverse, httr, jsonlite, ggplot2, 
                highcharter, formattable, plotly, 
                htmlwidgets, ggridges, viridis, hrbrthemes,
                shiny, shinythemes, flexdashboard)
