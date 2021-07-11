@@ -2,7 +2,7 @@
 
 <br/>
 
-Showcasing the impacts of climate change on popular climbing locations in California and Nevada through an interactive dashboard. 
+Showcasing the impacts of climate change on popular climbing locations in California and Nevada through an interactive dashboard. Currently focusing on impacts to daily maximum temperatures and ideal climbing weather. 
 
 <br/>
 
