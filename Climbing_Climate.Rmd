@@ -10,13 +10,12 @@ runtime: shiny
 
 ```{r setup, include=FALSE}
 
-# Installs any required packages that aren't already installed
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, httr, jsonlite, ggplot2, 
-               highcharter, formattable, plotly, 
-               htmlwidgets, ggridges, viridis, hrbrthemes,
-               shiny, shinythemes, flexdashboard)
-
+# Load required packages
+library(tidyverse)
+library(ggridges)
+library(plotly)
+library(viridis)
+library(hrbrthemes)
 
 # Read in data and create factor levels for the months column
 load("all_locations.rda")
@@ -41,15 +40,15 @@ selectInput('scenario',
                         "High Emissions"),
             selected = "High Emissions")
 
-sliderInput("years", "Range:",
+sliderInput("years", "Time Range:",
             min = 2020, max = 2100,
             value = c(2035, 2065),
             dragRange = TRUE,
             step = 5,
             sep = "")
 
-sliderInput("temps", "Range:",
-            min = 0, max = 100,
+sliderInput("temps", "Temperature Range:",
+            min = 20, max = 100,
             value = c(35, 55),
             dragRange = TRUE,
             post = " F",
@@ -91,6 +90,43 @@ output$ridge_plot <- renderPlot({
 })
 
 plotOutput('ridge_plot')
+
+```
+
+
+# Trends 
+
+```{r trends}
+
+# Trend plot only takes in location and ideal temps
+
+output$points <- renderPlotly({
+  
+  plot <- all_locations %>%
+  filter(Place == input$location) %>%
+  mutate(InRange = case_when(
+    Value >= input$temps[1] & Value <= input$temps[2] ~ 1,
+    TRUE ~ 0
+  )) %>%
+  group_by(Year, Scenario) %>%
+  summarize(Days = round(sum(InRange), digits = 2)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x = as.numeric(Year), y = Days, color = Scenario)) +
+  geom_smooth() +
+  geom_point(size = 1.5, alpha = .9) +
+  scale_color_manual(labels = c("Points, Low Emissions", "Points, High Emissions"),
+                     values = c("#de5f5f", "#74a1e8")) +
+  theme_ipsum() +
+  scale_x_continuous(breaks = seq(from = 2020, to = 2100, by = 10), limits = c(2020, 2100)) +
+  labs(x = "",
+       y = "Ideal Days",
+       title = paste0("Annual Ideal Climbing Days per Year in ", input$location))
+
+  ggplotly(plot)
+  
+})
+
+plotlyOutput('points')
 
 ```
 
