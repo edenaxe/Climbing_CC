@@ -11,3 +11,12 @@ Showcasing the impacts of climate change on popular climbing locations in Califo
         width="1000" height="500"
     <figcaption>Figure 1. Sample screenshot</figcaption>
 </figure>
+
+
+<br/>
+
+ <figure>
+   <img src="images/dist_plots.png" 
+        width="1000" height="500"
+    <figcaption>Figure 2. Sample screenshot</figcaption>
+</figure>
