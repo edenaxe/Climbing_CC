@@ -15,6 +15,8 @@ Showcasing the impacts of climate change on popular climbing locations in Califo
 
 <br/>
 
+<br/>
+
  <figure>
    <img src="images/dist_plots.png" 
         width="1000" height="500"
