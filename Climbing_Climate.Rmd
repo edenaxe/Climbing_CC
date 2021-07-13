@@ -16,6 +16,7 @@ library(ggridges)
 library(plotly)
 library(viridis)
 library(hrbrthemes)
+library(formattable)
 
 # Read in data and create factor levels for the months column
 load("all_locations.rda")
@@ -127,6 +128,62 @@ output$points <- renderPlotly({
 })
 
 plotlyOutput('points')
+
+```
+
+
+# Distribution Plots
+
+```{r}
+
+selectInput('multiL',
+            label = 'Locations:',
+            choices = locations_list,
+            selected = c("The Buttermilks", "Yosemite"),
+            multiple = TRUE)
+
+selectInput('multiS',
+            label = 'Scenarios:',
+            choices = c("High Emissions", "Low Emissions"),
+            selected = c("High Emissions", "Low Emissions"),
+            multiple = TRUE)
+
+```
+
+## Output
+
+```{r}
+
+# Add radio buttons for selecting different locations?
+# Distribution plots by place
+
+output$dist <- renderPlot({
+  
+  all_locations %>%
+    filter(Year %in% (input$years[1]:input$years[2]),
+           Scenario %in% input$multiS,
+           Place %in% input$multiL) %>%
+    ggplot(aes(x = Value, fill = Scenario)) + 
+    geom_density(alpha = 0.6) +
+    facet_wrap(~Place) +
+    theme_ipsum() +
+    scale_fill_brewer(palette = "Set2") +
+    labs(x = "Daily Maximum Temperature [F]",
+         y = "Density",
+         fill = "",
+         title="Distribution of daily maximum temperature",
+         subtitle="by climbing location") +
+    theme(plot.title = element_text(size = 16),
+          legend.position = "bottom",
+          plot.background = element_rect(fill = "#ffffff", color = NA)) +
+    geom_vline(xintercept = input$temps[2], linetype = 2, color = "darkblue") +
+    geom_vline(xintercept = input$temps[1], linetype = 2, color = "darkblue") +
+    annotate("rect", xmin = input$temps[1], xmax = input$temps[2], ymin = 0, 
+             fill = "blue", ymax = .035, alpha = 0.1) 
+  
+})
+
+plotOutput('dist', width = "100%", height = "550px")
 
 ```
 
