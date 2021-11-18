@@ -4,6 +4,8 @@
 
 Showcasing the impacts of climate change on popular climbing locations in California and Nevada through an interactive dashboard. Currently focusing on impacts to daily maximum temperatures and ideal climbing weather. 
 
+Edit: dashboard is live and available at [this](https://edenaxe.shinyapps.io/Climbing_Climate/) link. 
+
 <br/>
 
  <figure>
