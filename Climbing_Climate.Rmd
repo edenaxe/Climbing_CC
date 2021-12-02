@@ -4,7 +4,8 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: fill
-    theme: lumen
+    social: menu
+    theme: flatly
 runtime: shiny
 ---
 
@@ -16,7 +17,6 @@ library(ggridges)
 library(plotly)
 library(viridis)
 library(hrbrthemes)
-library(formattable)
 
 # Read in data and create factor levels for the months column
 load("all_locations.rda")
@@ -72,7 +72,45 @@ rctv_df <- reactive({
 
 ```
 
+# About
 
+[WHY CREATE THIS TOOL?]{.ul}
+
+**Climbing and climate change are inextricably linked.** Like many outdoor activities, weather variables including temperature and precipitation play key roles in season
+length. Temperatures and extreme precipitation events are increasing throughout
+the state of California and much of the world.[[i]](#_edn1) These shifts will likely impact our favorite climbing spots in the near future (if they aren't already doing so). A recent article examining the relationship of climate change to ski tourism found that by mid-century a shorter ski season in Canada will likely mean more crowded slopes.[[ii]](#_edn2) It is fair to assume that climbing will continue to experience a similar shift. This has grave implications for a sport that is rapidly growing in popularity and consistently fails to protect the integrity of the natural landscapes it relies on. 
+
+Currently, there aren't many resources for exploring the relationship between climbing season length and temperature changes for specific crags in California. This tool aims to address that gap. More so, this tool hopes to foster awareness and equip advocates and planners with actionable data.  
+
+[WHAT THIS TOOL IS (AND WHAT IT ISN'T)]{.ul}
+
+\*\* coming soon \*\*
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+[HOW THIS TOOL WAS CREATED]{.ul}
+
+\*\* coming soon \*\*
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+[WHO CREATED THIS TOOL?]{.ul}
+
+\*\* coming soon \*\*\
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+------------------------------------------------------------------------
+
+[[i]](#_ednref1) Bedsworth, Louise, Dan Cayan, Guido Franco, Leah Fisher, Sonya Ziaja. (California Governor’s Ofce of Planning and Research, Scripps Institution of Oceanography, California Energy Commission, California Public Utilities Commission). 2018. Statewide Summary Report. California’s Fourth Climate Change Assessment. Publication number: SUMCCCA4-2018-013. 
+
+[[ii]](#_ednref2) Scott D, Steiger R, Rutty M,
+Pons M, Johnson P. Climate Change and Ski Tourism Sustainability: An Integrated
+Model of the Adaptive Dynamics between Ski Area Operations and Skier
+Demand. *Sustainability*. 2020; 12(24):10617.
+<https://doi.org/10.3390/su122410617>
+
+ 
 
 # Ridge Plots
 
@@ -94,8 +132,7 @@ plotOutput('ridge_plot')
 
 ```
 
-
-# Trends 
+# Trends
 
 ```{r trends}
 
@@ -107,12 +144,12 @@ output$points <- renderPlotly({
   filter(Place == input$location) %>%
   mutate(InRange = case_when(
     Value >= input$temps[1] & Value <= input$temps[2] ~ 1,
-    TRUE ~ 0
-  )) %>%
+    TRUE ~ 0)) %>%
+  mutate(Year = as.numeric(Year)) %>%
   group_by(Year, Scenario) %>%
   summarize(Days = round(sum(InRange), digits = 2)) %>%
   as.data.frame() %>%
-  ggplot(aes(x = as.numeric(Year), y = Days, color = Scenario)) +
+  ggplot(aes(x = Year, y = Days, color = Scenario)) +
   geom_smooth() +
   geom_point(size = 1.5, alpha = .9) +
   scale_color_manual(labels = c("Points, Low Emissions", "Points, High Emissions"),
@@ -124,96 +161,10 @@ output$points <- renderPlotly({
        title = paste0("Annual Ideal Climbing Days per Year in ", input$location))
 
   ggplotly(plot)
+
   
 })
 
 plotlyOutput('points')
-
-```
-
-
-# Distribution Plots
-
-```{r}
-
-selectInput('multiL',
-            label = 'Locations:',
-            choices = locations_list,
-            selected = c("The Buttermilks", "Yosemite"),
-            multiple = TRUE)
-
-selectInput('multiS',
-            label = 'Scenarios:',
-            choices = c("High Emissions", "Low Emissions"),
-            selected = c("High Emissions", "Low Emissions"),
-            multiple = TRUE)
-
-```
-
-## Output
-
-```{r}
-
-# Add radio buttons for selecting different locations?
-# Distribution plots by place
-
-output$dist <- renderPlot({
-  
-  all_locations %>%
-    filter(Year %in% (input$years[1]:input$years[2]),
-           Scenario %in% input$multiS,
-           Place %in% input$multiL) %>%
-    ggplot(aes(x = Value, fill = Scenario)) + 
-    geom_density(alpha = 0.6) +
-    facet_wrap(~Place) +
-    theme_ipsum() +
-    scale_fill_brewer(palette = "Set2") +
-    labs(x = "Daily Maximum Temperature [F]",
-         y = "Density",
-         fill = "",
-         title="Distribution of daily maximum temperature",
-         subtitle="by climbing location") +
-    theme(plot.title = element_text(size = 16),
-          legend.position = "bottom",
-          plot.background = element_rect(fill = "#ffffff", color = NA)) +
-    geom_vline(xintercept = input$temps[2], linetype = 2, color = "darkblue") +
-    geom_vline(xintercept = input$temps[1], linetype = 2, color = "darkblue") +
-    annotate("rect", xmin = input$temps[1], xmax = input$temps[2], ymin = 0, 
-             fill = "blue", ymax = .035, alpha = 0.1) 
-  
-})
-
-plotOutput('dist', width = "100%", height = "550px")
-
-```
-
-
-# Test 
-
-## Table 
-
-```{r}
-
-renderTable({
-  head(rctv_df())
-})
-
-```
-
-## Text
-
-```{r test}
-
-output$values <- renderText({
-
-  paste("The starting year is", input$years[1],
-        "and the ending year is", input$years[2],
-        "and the total range is", input$years[2]-input$years[1], ".",
-        "The selected emissions scenario is", input$scenario, ".",
-        "The ideal maximum daily temperature range is", input$temps[1], "to", input$temps[2], ".")
-
-})
-
-textOutput('values')
 
 ```
