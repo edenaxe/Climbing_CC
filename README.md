@@ -16,11 +16,3 @@ Edit: dashboard is live and available at [this](https://edenaxe.shinyapps.io/Cli
 
 
 <br/>
-
-<br/>
-
- <figure>
-   <img src="images/dist_plots.png" 
-        width="1000" height="500"
-    <figcaption>Figure 2. Sample screenshot</figcaption>
-</figure>
